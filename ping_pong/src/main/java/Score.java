@@ -8,10 +8,16 @@ public class Score extends Rectangle{
     int player2;
 
     public Score(int GAME_WIDTH,int GAME_HEIGHT){
-
+        Score.GAME_WIDTH = GAME_WIDTH;
+        Score.GAME_HEIGHT = GAME_HEIGHT;
     }
 
     public void draw(Graphics graph){
+        graph.setColor(Color.WHITE);
+        graph.setFont(new Font("Sans",Font.PLAIN,60));
 
+        graph.drawLine(GAME_WIDTH/2,0,GAME_WIDTH/2,GAME_HEIGHT);
+        graph.drawString(String.valueOf(player1/10)+String.valueOf(player1%10),GAME_WIDTH/2-85,50);
+        graph.drawString(String.valueOf(player2/10)+String.valueOf(player2%10),GAME_WIDTH/2+20,50);
     }
 }

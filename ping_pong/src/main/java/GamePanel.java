@@ -35,41 +35,126 @@ public class GamePanel extends JPanel implements Runnable{
     }
 
     public void newBall(){
-
+        random = new Random();
+        ball = new BounceBall((GAME_WIDTH/2)-(BALL_DIAMETER/2),random.nextInt(GAME_HEIGHT-BALL_DIAMETER),BALL_DIAMETER,BALL_DIAMETER);
     }
 
     public void newPaddles(){
+        paddle1= new Paddle(0,(GAME_HEIGHT/2)-(PADDLE_HEIGHT/2),PADDLE_WIDTH,PADDLE_HEIGHT,1);
+        paddle2= new Paddle(GAME_WIDTH-PADDLE_WIDTH,(GAME_HEIGHT/2)-(PADDLE_HEIGHT/2),PADDLE_WIDTH,PADDLE_HEIGHT,2);
 
     }
 
     public void paint(Graphics graph){
-
+        image = createImage(getWidth(),getHeight());
+        graphics = image.getGraphics();
+        draw(graphics);
+        graph.drawImage(image,0,0,this);
     }
 
     public void draw(Graphics graph){
-
+        paddle1.draw(graph);
+        paddle2.draw(graph);
+        ball.draw(graph);
+        score.draw(graph);
     }
 
     public void move(){
-
+        paddle1.move();
+        paddle2.move();
+        ball.move();
     }
 
     public void checkCollision(){
+    //check if paddle is at window edge
+        if (paddle1.y <= 0){
+            paddle1.y =0;
+        }
+        if (paddle1.y >= (GAME_HEIGHT-PADDLE_HEIGHT)){
+            paddle1.y = GAME_HEIGHT-PADDLE_HEIGHT;
+        }
+        if (paddle2.y <= 0){
+            paddle2.y =0;
+        }
+        if (paddle2.y >= (GAME_HEIGHT-PADDLE_HEIGHT)){
+            paddle2.y = GAME_HEIGHT-PADDLE_HEIGHT;
+        }
 
+        //ball bounces off top and bottom edges of window
+        if(ball.y <= 0){
+            ball.setYDirection(-ball.yVelocity);
+        }
+        if(ball.y >= GAME_HEIGHT-BALL_DIAMETER){
+            ball.setYDirection(-ball.yVelocity);
+        }
+        //check if ball hits player paddle
+        if(ball.intersects(paddle1)){
+            ball.xVelocity = Math.abs(ball.xVelocity);
+            ball.xVelocity++;
+            if(ball.yVelocity > 0){
+                ball.yVelocity++;
+            }else{
+                ball.yVelocity--;
+            }
+            ball.setXDirection(ball.xVelocity);
+            ball.setYDirection(ball.yVelocity);
+        }
+
+        if(ball.intersects(paddle2)){
+            ball.xVelocity = Math.abs(ball.xVelocity);
+            ball.xVelocity++;
+            if(ball.yVelocity > 0){
+                ball.yVelocity++;
+            }else{
+                ball.yVelocity--;
+            }
+            ball.setXDirection(-ball.xVelocity);
+            ball.setYDirection(ball.yVelocity);
+        }
+
+        //score system for game...creates new paddles and new ball.
+        if(ball.x <= 0){
+            score.player2++;
+            newPaddles();
+            newBall();
+//            System.out.println("PLAYER2 SCORE = "+score.player2);
+        }
+        if(ball.x >= GAME_WIDTH-BALL_DIAMETER){
+            score.player1++;
+            newPaddles();
+            newBall();
+//            System.out.println("PLAYER 1 SCORE = "+score.player1);
+        }
     }
 
     public void run(){
-
+        long lastTime = System.nanoTime();
+        double amountOfTicks = 60.0;
+        double ns = 1000000000 / amountOfTicks;
+        double delta = 0;
+        while(true){
+            long now = System.nanoTime();
+            delta += (now - lastTime)/ns;
+            lastTime = now;
+            if (delta >= 1){
+                move();
+                checkCollision();
+                repaint();
+                delta--;
+            }
+        }
     }
 
     public class ActualListener extends KeyAdapter{
 
         public void keyPressed(KeyEvent key){
-
+            paddle1.KeyPressed(key);
+            paddle2.KeyPressed(key);
         }
 
-        public void KeyReleased(KeyEvent key){
-
+        public void keyReleased(KeyEvent key){
+            paddle1.KeyReleased(key);
+            paddle2.KeyReleased(key);
         }
     }
 }
